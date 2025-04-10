@@ -546,19 +546,28 @@
                 super(config);
                 const load = this.load.bind(this);
                 this.load = function(context, config, callbacks) {
-                    // 拦截manifest和level请求
+                    // 判断是否为清单或级别请求
                     if (context.type === 'manifest' || context.type === 'level') {
+                        // 如果是移动设备浏览器，直接将URL重写为经过代理的URL
+                        if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) {
+                            // 将直接m3u8请求重定向到我们的代理
+                            const originalUrl = context.url;
+                            if (originalUrl && originalUrl.endsWith('.m3u8')) {
+                                // 修改URL指向我们的Pages Function
+                                context.url = `${window.location.origin}/functions/manifest-proxy?url=${encodeURIComponent(originalUrl)}`;
+                                console.log('重定向m3u8请求到代理:', context.url);
+                            }
+                        }
+
                         const onSuccess = callbacks.onSuccess;
                         callbacks.onSuccess = function(response, stats, context) {
-                            // 如果是m3u8文件，处理内容以移除广告分段
+                            // 在桌面端，我们仍然在客户端过滤内容
                             if (response.data && typeof response.data === 'string') {
-                                // 过滤掉广告段 - 实现更精确的广告过滤逻辑
-                                response.data = filterAdsFromM3U8(response.data, true);
+                                response.data = filterAdsFromM3U8(response.data);
                             }
                             return onSuccess(response, stats, context);
                         };
                     }
-                    // 执行原始load方法
                     load(context, config, callbacks);
                 };
             }

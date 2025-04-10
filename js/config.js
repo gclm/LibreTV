@@ -1,5 +1,6 @@
 // 全局常量配置
-const PROXY_URL = 'https://proxy.mengze.vip/proxy/';
+// 修改PROXY_URL指向Cloudflare Pages Function
+const PROXY_URL = '/functions/manifest-proxy?url=';
 const HOPLAYER_URL = 'https://hoplayer.com/index.html';
 const SEARCH_HISTORY_KEY = 'videoSearchHistory';
 const MAX_HISTORY_ITEMS = 5;
